@@ -11,14 +11,26 @@ def get_db_connection():
 def ensure_columns():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("PRAGMA table_info(schedules)")
-    columns = [col[1] for col in cursor.fetchall()]
-    if "created_at" not in columns:
-        cursor.execute("ALTER TABLE schedules ADD COLUMN created_at TEXT")
-    if "updated_at" not in columns:
-        cursor.execute("ALTER TABLE schedules ADD COLUMN updated_at TEXT")
+
+    # 1️⃣ 테이블이 존재하는지 먼저 확인
+    cursor.execute("""
+        SELECT name FROM sqlite_master 
+        WHERE type='table' AND name='schedules'
+    """)
+    table_exists = cursor.fetchone()
+
+    # 2️⃣ 테이블이 존재할 때만 컬럼 확인 및 추가
+    if table_exists:
+        cursor.execute("PRAGMA table_info(schedules)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if "created_at" not in columns:
+            cursor.execute("ALTER TABLE schedules ADD COLUMN created_at TEXT")
+        if "updated_at" not in columns:
+            cursor.execute("ALTER TABLE schedules ADD COLUMN updated_at TEXT")
+    
     conn.commit()
     conn.close()
+
 
 def load_schedules():
     conn = get_db_connection()
