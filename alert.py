@@ -22,7 +22,7 @@ def send_teams_alert(payload, return_response=False):
         return (False, None) if return_response else False
 
 def generate_alert_message(row: dict, alert_type="update"):
-    title = "**📢 일정 변경 알림**" if alert_type == "update" else "**🆕 신규 일정 등록**"
+    title = "🔔**📢일정 변경 알림**🔔" if alert_type == "update" else "🔔**📢신규 일정 알림**🔔"
     
     # Use plain text with \n instead of <br>
     body = (
@@ -30,7 +30,7 @@ def generate_alert_message(row: dict, alert_type="update"):
         f"- 시즌: {row['season']}\n"
         f"- 팀: {row['team']}\n"
         f"- 업무: {row['task']}\n"
-        f"- 담당자: {row['person1']} ({row['person1_email']})\n"
+        f"- 담당자: 👉@{row['person1']} ({row['person1_email']})\n"
         f"- 마감일: {row['due_date']}\n"
     )
 

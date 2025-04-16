@@ -35,7 +35,7 @@ def generate_daily_alert_message():
     for _, row in due_soon.iterrows():
         diff = int(row["due_diff"])
         label = date_labels.get(diff, f"D-{diff}")
-        person_line = f"- {row['person1']} ({row['team']}): [{row['season']}] '{row['task']}'"
+        person_line = f"- @**{row['person1']} ({row['team']})**: [{row['season']}] '{row['task']}'"
         grouped[label].append(person_line)
 
     # 상세 메시지: 마감 일정
