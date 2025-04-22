@@ -23,7 +23,9 @@ def tab1(df):
             elif val.startswith("D+"):
                 return 1000 + int(val[2:])
             return 9999
-
+        if df_filtered.empty:
+            st.warning("⚠️ 선택한 팀에 해당하는 일정이 없습니다.")
+            return
         df_filtered.loc[:,"D-Day Sort"] = df_filtered["D-Day"].apply(dday_sort_key)
 
         # 2. 트리거: 마감일 지난 일정 보기
