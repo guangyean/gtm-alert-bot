@@ -13,7 +13,10 @@ def tab1(df):
         filter_col, button_col = st.columns([16, 1.2])
         with filter_col:
             team_filter = st.multiselect("팀 선택", df["team"].unique(), default=list(df["team"].unique()))
+        df["team"] = df["team"].astype(str).str.strip()
         df_filtered = df[df["team"].isin(team_filter)].copy()
+        st.write("🔍 필터 전 개수:", len(df))
+        st.write("🔍 필터 후 개수:", len(df_filtered))
         # 1. D-Day 정렬 숫자용 임시 컬럼
         def dday_sort_key(val):
             if val == "D-Day":
