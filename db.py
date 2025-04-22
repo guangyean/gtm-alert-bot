@@ -1,70 +1,56 @@
-import sqlite3
+import streamlit as st
+import gspread
 import pandas as pd
 from datetime import datetime
-from config import DB_PATH
+from google.oauth2.service_account import Credentials
 
-def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def ensure_columns():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    # 1️⃣ 테이블이 존재하는지 먼저 확인
-    cursor.execute("""
-        SELECT name FROM sqlite_master 
-        WHERE type='table' AND name='schedules'
-    """)
-    table_exists = cursor.fetchone()
-
-    # 2️⃣ 테이블이 존재할 때만 컬럼 확인 및 추가
-    if table_exists:
-        cursor.execute("PRAGMA table_info(schedules)")
-        columns = [col[1] for col in cursor.fetchall()]
-        if "created_at" not in columns:
-            cursor.execute("ALTER TABLE schedules ADD COLUMN created_at TEXT")
-        if "updated_at" not in columns:
-            cursor.execute("ALTER TABLE schedules ADD COLUMN updated_at TEXT")
-    
-    conn.commit()
-    conn.close()
-
+def get_worksheet():
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
+    client = gspread.authorize(creds)
+    sheet = client.open("GTM스케줄데이터").worksheet("schedules")
+    return sheet
 
 def load_schedules():
-    conn = get_db_connection()
-    df = pd.read_sql_query("SELECT * FROM schedules", conn)
-    conn.close()
+    ws = get_worksheet()
+    records = ws.get_all_records()
+    df = pd.DataFrame(records)
+
+    for col in ["start_date", "due_date", "created_at", "updated_at"]:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce")
+
     return df
 
-def update_schedule(schedule_id: int, updates: dict):
-    updates["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    query = "UPDATE schedules SET " + ", ".join(f"{k}=?" for k in updates) + " WHERE id=?"
-    values = list(updates.values()) + [schedule_id]
-    cursor.execute(query, values)
-    conn.commit()
-    success = cursor.rowcount > 0
-    conn.close()
-    return success
-
 def insert_schedule(data: dict):
+    ws = get_worksheet()
     data["created_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    keys = ", ".join(data.keys())
-    placeholders = ", ".join(["?"] * len(data))
-    values = list(data.values())
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(f"INSERT INTO schedules ({keys}) VALUES ({placeholders})", values)
-    conn.commit()
-    conn.close()
+    headers = ws.row_values(1)
+    row = [data.get(h, "") for h in headers]
+    ws.append_row(row)
 
-def delete_schedule(schedule_id):
-    schedule_id = int(schedule_id)  # numpy 타입 방지
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM schedules WHERE id=?", (schedule_id,))
-    conn.commit()
-    conn.close()
+def update_schedule(task: str, updates: dict):
+    ws = get_worksheet()
+    df = load_schedules()
+    headers = ws.row_values(1)
+
+    if task not in df["task"].values:
+        return False
+
+    row_idx = df[df["task"] == task].index[0] + 2
+    updates["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    for key, value in updates.items():
+        if key in headers:
+            col_idx = headers.index(key) + 1
+            ws.update_cell(row_idx, col_idx, value)
+    return True
+
+def delete_schedule(task: str):
+    ws = get_worksheet()
+    df = load_schedules()
+    if task not in df["task"].values:
+        return False
+    row_idx = df[df["task"] == task].index[0] + 2
+    ws.delete_rows(row_idx)
+    return True
