@@ -13,7 +13,7 @@ def tab1(df):
         filter_col, button_col = st.columns([16, 1.2])
         with filter_col:
             team_filter = st.multiselect("팀 선택", df["team"].unique(), default=list(df["team"].unique()))
-        df_filtered = df[df["team"].isin(team_filter)]
+        df_filtered = df[df["team"].isin(team_filter)].copy
         # 1. D-Day 정렬 숫자용 임시 컬럼
         def dday_sort_key(val):
             if val == "D-Day":
@@ -24,7 +24,7 @@ def tab1(df):
                 return 1000 + int(val[2:])
             return 9999
 
-        df_filtered["D-Day Sort"] = df_filtered["D-Day"].apply(dday_sort_key)
+        df_filtered.loc[:,"D-Day Sort"] = df_filtered["D-Day"].apply(dday_sort_key)
 
         # 2. 트리거: 마감일 지난 일정 보기
         show_past = st.checkbox("📅 마감일 지난 일정도 보기 (D+)", value=False)
@@ -35,6 +35,9 @@ def tab1(df):
 
         # 4. 정렬
         df_filtered = df_filtered.sort_values("D-Day Sort").reset_index(drop=True)
+
+        if "note" not in df_filtered.columns:
+             df_filtered["note"] = ""
 
         df_display = df_filtered.rename(columns={
             "D-Day": "D-Day",

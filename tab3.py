@@ -83,6 +83,6 @@ def tab3():
         st.download_button(
             label="⬇️ 저장",
             data=excel_bytes,
-            file_name="GTM일정표.xlsx",
+            file_name="Auto_GTM_Schedule.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )

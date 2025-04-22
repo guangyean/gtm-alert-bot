@@ -29,15 +29,18 @@ def insert_schedule(data: dict):
     row = [data.get(h, "") for h in headers]
     ws.append_row(row)
 
-def update_schedule(task: str, updates: dict):
+def update_schedule(season: str, task: str, updates: dict):
     ws = get_worksheet()
     df = load_schedules()
     headers = ws.row_values(1)
-
-    if task not in df["task"].values:
+    
+    match = df[(df["season"] == season) & (df["task"] == task)]
+    if match.empty:
         return False
+    
 
-    row_idx = df[df["task"] == task].index[0] + 2
+
+    row_idx = match.index[0] + 2
     updates["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     for key, value in updates.items():
@@ -46,11 +49,13 @@ def update_schedule(task: str, updates: dict):
             ws.update_cell(row_idx, col_idx, value)
     return True
 
-def delete_schedule(task: str):
+def delete_schedule(season: str, task: str):
     ws = get_worksheet()
     df = load_schedules()
-    if task not in df["task"].values:
+
+    match = df[(df["season"] == season) & (df["task"] == task)]
+    if match.empty:
         return False
-    row_idx = df[df["task"] == task].index[0] + 2
+    row_idx = match.index[0] + 2
     ws.delete_rows(row_idx)
     return True

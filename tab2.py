@@ -29,15 +29,15 @@ def tab2(df):
                 "항목": ["시즌", "업무", "시작일", "마감일", "담당팀", "담당자", "이메일", "비고"],
                 "내용": [
                     row["season"], row["task"], row["start_date"], row["due_date"],
-                    row["team"], row["person1"], row["person1_email"], row["note"]
+                    row["team"], row["person1"], row["person1_email"], row.get("note", "")
                 ]
                 })
                 st.dataframe(detail_df.set_index("항목"), use_container_width=True)
                 
 
 
-        new_due = st.date_input("📅 마감일", datetime.strptime(row["due_date"], "%Y-%m-%d"))
-        new_note = st.text_input("📝 비고", row["note"])
+        new_due = st.date_input("📅 마감일", pd.to_datetime.strptime(row["due_date"]))
+        new_note = st.text_input("📝 비고", row.get("note", ""))
         person_dict = create_person_dict(df)
         default_person = f"{row['person1']} ({row['person1_email']})"
         selected_person = st.selectbox("👤 담당자 선택", list(person_dict.keys()), index=list(person_dict).index(default_person))
@@ -54,8 +54,7 @@ def tab2(df):
                     "person1_email": new_person1_email
                 }
                 try:
-                    schedule_id = int(row["id"])
-                    if update_schedule(schedule_id, updates):
+                    if update_schedule(row["season"], row["task"], updates):
                         # 🔥 저장된 일정 정보를 세션에 기록
                         st.session_state.updated_schedule = {
                             "season": row["season"],
@@ -75,9 +74,7 @@ def tab2(df):
 
         with col2:
             if st.button("🗑️ 삭제"):
-                #st.write(f"[삭제 요청] ID: {row['id']} / 타입: {type(row['id'])}")
-                delete_schedule(int(row["id"]))
-                #delete_schedule(row["id"])
+                delete_schedule(row["season"], row["task"])
                 st.toast("✅ 삭제 완료")
                 time.sleep(1)
                 st.rerun()

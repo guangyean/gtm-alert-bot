@@ -1,12 +1,10 @@
 
 import pandas as pd
 from datetime import datetime, timedelta
-from db import load_schedules
 from alert import send_teams_alert
 from config import APP_URL
 from collections import defaultdict
-import schedule
-import time
+from db import load_schedules
 
 
 # 아이콘과 라벨 사전

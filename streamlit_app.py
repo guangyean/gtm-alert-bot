@@ -1,10 +1,9 @@
 import streamlit as st
 from datetime import datetime, timedelta
 import pandas as pd
-from db import load_schedules, ensure_columns
 from utils import calculate_d_day
 from streamlit_option_menu import option_menu
-
+from db import load_schedules
 from tab1 import tab1
 from tab2 import tab2
 from tab3 import tab3
@@ -56,7 +55,6 @@ def setup_tab_menu(default_tab):
 
 def main():
     st.set_page_config("📅 GTM 일정 대시보드", layout="wide")
-    ensure_columns()
     st.title("📅 GTM 일정 관리 대시보드")
 
     init_session_state()

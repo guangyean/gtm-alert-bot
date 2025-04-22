@@ -1,7 +1,4 @@
 import requests
-from config import WEBHOOK_URL, APP_URL
-
-import requests
 from config import WEBHOOK_URL
 
 # def send_teams_alert(message_card: dict, return_response=False):
