@@ -92,7 +92,10 @@ def main():
         return df
 
     if selected_tab == "view":
-        tab1(reload_df())
+        df_reload = reload_df()
+        st.write("🚨 df.columns:", df.columns.tolist())
+        st.write("🚨 df.shape:", df.shape)
+        tab1(df_reload)
     elif selected_tab == "edit":
         tab2(df)
     elif selected_tab == "generate":
