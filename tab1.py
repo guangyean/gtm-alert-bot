@@ -15,9 +15,7 @@ def tab1(df):
             team_filter = st.multiselect("팀 선택", df["team"].unique(), default=list(df["team"].unique()))
         df["team"] = df["team"].astype(str).str.strip()
         df_filtered = df[df["team"].isin(team_filter)].copy()
-        st.write("🧪 df_filtered 타입:", type(df_filtered))
-        st.write("🧪 df_filtered.head():", df_filtered.head())
-        st.write("🧪 df_filtered['D-Day']: ", df_filtered['D-Day'].head())
+
         # 1. D-Day 정렬 숫자용 임시 컬럼
         def dday_sort_key(val):
             if val == "D-Day":
@@ -54,7 +52,7 @@ def tab1(df):
             "due_date": "마감일",
             "note": "비고"
         })[["D-Day", "시즌", "팀", "업무", "담당자", "마감일", "비고"]]
-      
+        df_display["마감일"] = pd.to_datetime(df_display["마감일"], errors="coerce").dt.strftime("%Y-%m-%d")
         st.dataframe(df_display, use_container_width=True, height=900)
 
         with button_col:
