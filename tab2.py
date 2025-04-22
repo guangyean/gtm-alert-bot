@@ -28,7 +28,9 @@ def tab2(df):
                 detail_df = pd.DataFrame({
                 "항목": ["시즌", "업무", "시작일", "마감일", "담당팀", "담당자", "이메일", "비고"],
                 "내용": [
-                    row["season"], row["task"], row["start_date"], row["due_date"],
+                    row["season"], row["task"], 
+                    row["start_date"].strftime("%Y-%m-%d") if isinstance(row["start_date"], (datetime, pd.Timestamp)) else row["start_date"],
+                    row["due_date"].strftime("%Y-%m-%d") if isinstance(row["due_date"], (datetime, pd.Timestamp)) else row["due_date"],
                     row["team"], row["person1"], row["person1_email"], row.get("note", "")
                 ]
                 })
@@ -36,7 +38,7 @@ def tab2(df):
                 
 
 
-        new_due = st.date_input("📅 마감일", pd.to_datetime.strptime(row["due_date"]))
+        new_due = st.date_input("📅 마감일", row["due_date"].date() if isinstance(row["due_date"], (datetime, pd.Timestamp)) else datetime.today().date())
         new_note = st.text_input("📝 비고", row.get("note", ""))
         person_dict = create_person_dict(df)
         default_person = f"{row['person1']} ({row['person1_email']})"
