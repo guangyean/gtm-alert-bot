@@ -15,8 +15,9 @@ def tab1(df):
             team_filter = st.multiselect("팀 선택", df["team"].unique(), default=list(df["team"].unique()))
         df["team"] = df["team"].astype(str).str.strip()
         df_filtered = df[df["team"].isin(team_filter)].copy()
-        st.write("🔍 필터 전 개수:", len(df))
-        st.write("🔍 필터 후 개수:", len(df_filtered))
+        st.write("🧪 df_filtered 타입:", type(df_filtered))
+        st.write("🧪 df_filtered.head():", df_filtered.head())
+        st.write("🧪 df_filtered['D-Day']: ", df_filtered['D-Day'].head())
         # 1. D-Day 정렬 숫자용 임시 컬럼
         def dday_sort_key(val):
             if val == "D-Day":
@@ -26,7 +27,7 @@ def tab1(df):
             elif val.startswith("D+"):
                 return 1000 + int(val[2:])
             return 9999
-        if df_filtered.empty:
+        if len(df_filtered) == 0:
             st.warning("⚠️ 선택한 팀에 해당하는 일정이 없습니다.")
             return
         df_filtered.loc[:,"D-Day Sort"] = df_filtered["D-Day"].apply(dday_sort_key)
