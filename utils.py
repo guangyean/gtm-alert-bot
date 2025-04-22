@@ -2,10 +2,18 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 
-def calculate_d_day(due_date: str) -> str:
+def calculate_d_day(due_date) -> str:
     try:
         today = datetime.today().date()
-        due = datetime.strptime(due_date, "%Y-%m-%d").date()
+        # 문자열이면 파싱, datetime이면 그대로 사용
+        if isinstance(due_date, str):
+            due = datetime.strptime(due_date, "%Y-%m-%d").date()
+        elif isinstance(due_date, datetime):
+            due = due_date.date()
+        elif isinstance(due_date, pd.Timestamp):
+            due = due_date.date()
+        else:
+            return "날짜 오류"
         delta = (due - today).days
         return "D-Day" if delta == 0 else f"D-{delta}" if delta > 0 else f"D+{-delta}"
     except:
