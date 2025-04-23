@@ -60,7 +60,13 @@ def main():
 
     init_session_state()
 
-    df = load_schedules()
+
+    @st.cache_data(ttl=300)
+    def get_cached_schedules():
+        return load_schedules()
+
+    df = get_cached_schedules()
+
     if df.empty:
         st.warning("데이터가 없습니다.")
         return
@@ -101,7 +107,7 @@ def main():
     selected_tab = setup_tab_menu(default_tab)
 
     def reload_df():
-        df = load_schedules()
+        df = get_cached_schedules()
         df["D-Day"] = df["due_date"].apply(calculate_d_day)
         df["created_at_date"] = pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce").dt.date
         df["updated_at_date"] = pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce").dt.date

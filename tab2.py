@@ -57,6 +57,7 @@ def tab2(df):
                 }
                 try:
                     if update_schedule(row["season"], row["task"], updates):
+                        st.cache_data.clear()
                         # 🔥 저장된 일정 정보를 세션에 기록
                         st.session_state.updated_schedule = {
                             "season": row["season"],
@@ -157,6 +158,7 @@ def tab2(df):
                     "note": new_note_add
                 }
                 insert_schedule(data)
+                st.cache_data.clear()
                 st.session_state.recently_added_schedule = data
                 st.session_state.reset_form = True
                 st.toast("✅ 일정이 성공적으로 추가되었습니다.")
