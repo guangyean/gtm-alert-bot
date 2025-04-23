@@ -13,12 +13,7 @@ def tab3():
         "발주 마감일 + 전체 기간(일)"
     ])
 
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        season = st.selectbox("시즌 선택", ["25SS", "25FW", "26SS", "26FW", "27SS", "27FW"])
-    with col2:
-        kickoff_date = st.date_input("📅 Kick-off 날짜 입력")
-        
+    season = st.selectbox("시즌 선택", ["25SS", "25FW", "26SS", "26FW", "27SS", "27FW"])
 
     kickoff_date, po_date, working_days, total_days = None, None, None, None
     holiday_np = load_holidays()
