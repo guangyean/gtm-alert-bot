@@ -2,11 +2,12 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 from utils import to_excel
+from pytz import timezone
 
 def tab1(df):
         
-        today = datetime.today().date()
-        yesterday = today - pd.Timedelta(days=1)
+        today = datetime.now(timezone("Asia/Seoul")).date()
+        yesterday = today - timedelta(days=1)
         st.info(f"📌오늘 추가: {sum(df['created_at_date'] == today)}건 / 수정: {sum(df['updated_at_date'] == today)}건")
         st.info(f"📌어제 추가: {sum(df['created_at_date'] == yesterday)}건 / 수정: {sum(df['updated_at_date'] == yesterday)}건")
 
