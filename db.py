@@ -56,6 +56,6 @@ def delete_schedule(season: str, task: str):
     match = df[(df["season"] == season) & (df["task"] == task)]
     if match.empty:
         return False
-    row_idx = match.index[0] + 2
+    row_idx = int(match.index[0] + 2)
     ws.delete_rows(row_idx)
     return True
