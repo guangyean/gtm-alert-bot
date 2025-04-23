@@ -98,9 +98,12 @@ def main():
     )
 
     query_params = st.query_params
+    tab_param = query_params.get("tab", ["view"])
+    if isinstance(tab_param, list):
+        tab_param = tab_param[0]
 
     if "selected_tab" not in st.session_state:
-        st.session_state.selected_tab = "view"
+        st.session_state.selected_tab = tab_param
 
     filter_mode = query_params.get("filter", "")
     if isinstance(filter_mode, list):
