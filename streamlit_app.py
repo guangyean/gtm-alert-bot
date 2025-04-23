@@ -52,8 +52,14 @@ def setup_tab_menu(default_tab):
             }
         }
     )
-    st.session_state.selected_tab = tab_options[selected_tab_label]
-    return tab_options[selected_tab_label]
+    selected_value = tab_options[selected_tab_label]
+
+    # ✅ Only update and rerun if tab actually changed
+    if selected_value != st.session_state.get("selected_tab"):
+        st.session_state.selected_tab = selected_value
+        st.rerun()  # ✅ rerun immediately so tab switches instantly
+
+    return selected_value
 
 def main():
     st.set_page_config("📅 GTM 일정 대시보드", layout="wide")
