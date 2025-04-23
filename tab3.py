@@ -4,7 +4,7 @@ from datetime import timedelta
 from utils import to_excel, load_holidays, load_standard_offsets
 def tab3():
     st.markdown("#### 🪄 자동 일정 생성")
-
+    
     method = st.selectbox("입력 유형을 선택하세요", [
         "Kick-off + 발주 마감일",
         #"Kick-off + 영업일 런타임",
@@ -12,6 +12,13 @@ def tab3():
         #"발주 마감일 + 영업일 런타임",
         "발주 마감일 + 전체 기간(일)"
     ])
+
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        season = st.selectbox("시즌 선택", ["25SS", "25FW", "26SS", "26FW", "27SS", "27FW"])
+    with col2:
+        kickoff_date = st.date_input("📅 Kick-off 날짜 입력")
+        
 
     kickoff_date, po_date, working_days = None, None, None
     holiday_np = load_holidays()
@@ -39,8 +46,9 @@ def tab3():
         po_date = st.date_input("발주 마감일 입력")
         working_days = np.busday_count(kickoff_date, po_date, holidays=holiday_np)
 
-    if kickoff_date and po_date and working_days:
-        st.success(f"📆 Kick-off: {kickoff_date} / 발주 마감일: {po_date} / 전체 기간(일): {working_days}일")
+    if kickoff_date and po_date and working_days is not None:
+        st.success(f"📆 시즌: {season} / 기간: {total_days}일 / 영업일: {working_days}일")
+        st.success(f"📅 Kick-off: {kickoff_date} / 발주 마감일: {po_date}")
 
         standard_df = load_standard_offsets()
         scaling_ratio = working_days / 150  # 고정된 표준 워킹데이 수
