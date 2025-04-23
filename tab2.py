@@ -45,7 +45,7 @@ def tab2(df):
         selected_person = st.selectbox("👤 담당자 선택", list(person_dict.keys()), index=list(person_dict).index(default_person))
         new_person1, new_person1_email = person_dict[selected_person]
 
-        col1, col2, col_spacer, col_alert = st.columns([1.2, 1.2, 3.9, 2.5])
+        col1, col2, col_spacer, col_alert = st.columns([1.1, 1.1, 4.1, 2.5])
 
         with col1:
             if st.button("💾 저장"):
