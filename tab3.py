@@ -20,31 +20,36 @@ def tab3():
         kickoff_date = st.date_input("📅 Kick-off 날짜 입력")
         
 
-    kickoff_date, po_date, working_days = None, None, None
+    kickoff_date, po_date, working_days, total_days = None, None, None, None
     holiday_np = load_holidays()
 
     if method == "Kick-off + 영업일 런타임":
         kickoff_date = st.date_input("Kick-off 날짜 입력")
         working_days = st.number_input("전체 영업일 수 입력", min_value=1)
         po_date = np.busday_offset(kickoff_date, int(working_days), holidays=holiday_np)
+        total_days = (po_date - kickoff_date).days 
     elif method == "Kick-off + 전체 기간(일)":
         kickoff_date = st.date_input("Kick-off 날짜 입력")
         total_days = st.number_input("전체 기간(일) 입력", min_value=1)
         po_date = kickoff_date + timedelta(days=int(total_days))
         working_days = np.busday_count(kickoff_date, po_date, holidays=holiday_np)
+        total_days = (po_date - kickoff_date).days 
     elif method == "PLM 마감일 + 영업일 런타임":
         po_date = st.date_input("PLM 마감일 입력")
         working_days = st.number_input("전체 영업일 수 입력", min_value=1)
         kickoff_date = np.busday_offset(po_date, -int(working_days), holidays=holiday_np)
+        total_days = (po_date - kickoff_date).days 
     elif method == "발주 마감일 + 전체 기간(일)":
         po_date = st.date_input("발주 마감일 입력")
         total_days = st.number_input("전체 기간(일) 입력", min_value=1)
         kickoff_date = po_date - timedelta(days=int(total_days))
         working_days = np.busday_count(kickoff_date, po_date, holidays=holiday_np)
+        total_days = (po_date - kickoff_date).days 
     elif method == "Kick-off + 발주 마감일":
         kickoff_date = st.date_input("Kick-off 날짜 입력")
         po_date = st.date_input("발주 마감일 입력")
         working_days = np.busday_count(kickoff_date, po_date, holidays=holiday_np)
+        total_days = (po_date - kickoff_date).days 
 
     if kickoff_date and po_date and total_days is not None and working_days is not None:
         st.success(f"📆 시즌: {season} / 기간: {total_days}일 / 영업일: {working_days}일")
