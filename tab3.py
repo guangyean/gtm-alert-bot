@@ -46,7 +46,7 @@ def tab3():
         po_date = st.date_input("발주 마감일 입력")
         working_days = np.busday_count(kickoff_date, po_date, holidays=holiday_np)
 
-    if kickoff_date and po_date and working_days is not None:
+    if all([kickoff_date, po_date, total_days is not None, working_days is not None]):
         st.success(f"📆 시즌: {season} / 기간: {total_days}일 / 영업일: {working_days}일")
         st.success(f"📅 Kick-off: {kickoff_date} / 발주 마감일: {po_date}")
 
