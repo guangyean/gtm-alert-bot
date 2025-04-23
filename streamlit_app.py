@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import datetime, timedelta
 import pandas as pd
+import pytz
 from utils import calculate_d_day
 from streamlit_option_menu import option_menu
 from db import load_schedules
@@ -65,8 +66,23 @@ def main():
         return
 
     df["D-Day"] = df["due_date"].apply(calculate_d_day)
-    df["created_at_date"] = pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce").dt.date
-    df["updated_at_date"] = pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce").dt.date
+    #df["created_at_date"] = pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce").dt.date
+    #df["updated_at_date"] = pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce").dt.date
+    
+    seoul = pytz.timezone("Asia/Seoul")
+
+    df["created_at_date"] = (
+        pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce")
+        .dt.tz_localize("UTC")
+        .dt.tz_convert(seoul)
+        .dt.date
+    )
+    df["updated_at_date"] = (
+        pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce")
+        .dt.tz_localize("UTC")
+        .dt.tz_convert(seoul)
+        .dt.date
+    )
 
     query_params = st.query_params
     default_tab = query_params.get("tab", "view")
