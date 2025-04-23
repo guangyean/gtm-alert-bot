@@ -68,7 +68,6 @@ def tab2(df):
                             "due_date": new_due.strftime("%Y-%m-%d")
                         }
                         st.toast("✅ 일정이 수정되었습니다.")
-                        st.query_params["tab"] = "edit"
                         time.sleep(1)
                         st.rerun()
                     else:
@@ -163,7 +162,6 @@ def tab2(df):
                 st.session_state.recently_added_schedule = data
                 st.session_state.reset_form = True
                 st.toast("✅ 일정이 성공적으로 추가되었습니다.")
-                st.query_params["tab"] = "edit"
                 time.sleep(0.8)
                 st.rerun()
 

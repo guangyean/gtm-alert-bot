@@ -52,6 +52,7 @@ def setup_tab_menu(default_tab):
             }
         }
     )
+    st.session_state.selected_tab = tab_options[selected_tab_label]
     return tab_options[selected_tab_label]
 
 def main():
@@ -91,9 +92,9 @@ def main():
     )
 
     query_params = st.query_params
-    default_tab = query_params.get("tab", "view")
-    if isinstance(default_tab, list):
-        default_tab = default_tab[0]
+
+    if "selected_tab" not in st.session_state:
+        st.session_state.selected_tab = "view"
 
     filter_mode = query_params.get("filter", "")
     if isinstance(filter_mode, list):
@@ -104,7 +105,7 @@ def main():
         yesterday = today - timedelta(days=1)
         df = df[(df["created_at_date"] == yesterday) | (df["updated_at_date"] == yesterday)]
 
-    selected_tab = setup_tab_menu(default_tab)
+    selected_tab = setup_tab_menu(st.session_state.selected_tab)
 
     def reload_df():
         df = get_cached_schedules()
