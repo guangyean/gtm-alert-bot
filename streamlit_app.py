@@ -7,7 +7,7 @@ from streamlit_option_menu import option_menu
 from db import load_schedules
 from tab1 import tab1
 from tab2 import tab2
-from tab3 import tab3
+from tab3_org import tab3
 
 def init_session_state():
     for key in ["add_form_warning", "reset_form", "recently_added_schedule", "selected_label"]:
