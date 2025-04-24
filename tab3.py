@@ -106,7 +106,7 @@ def tab3():
         df["person2"] = ""
         df["person2_email"] = ""
 
-        col_left, col_right, col_spacer, col_side = st.columns([2, 2,6, 1])
+        col_left, col_right, col_spacer, col_side = st.columns([2, 2, 6, 3])
         with col_left:
             excel_bytes = to_excel(df.rename(columns={
                 "업무명": "Task 이름",
