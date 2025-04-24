@@ -84,16 +84,16 @@ def reload_df():
 
     # ✅ Convert to KST
     seoul = pytz.timezone("Asia/Seoul")
+    
     df["created_at_date"] = (
-        pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce")
-        .dt.tz_localize("UTC")
-        .dt.tz_convert(seoul)
-        .dt.date
+    pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce")
+    .dt.tz_localize("Asia/Seoul", ambiguous='NaT')  # assume KST
+    .dt.date
     )
+
     df["updated_at_date"] = (
         pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce")
-        .dt.tz_localize("UTC")
-        .dt.tz_convert(seoul)
+        .dt.tz_localize("Asia/Seoul", ambiguous='NaT')
         .dt.date
     )
 
