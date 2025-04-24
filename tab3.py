@@ -10,7 +10,7 @@ from datetime import datetime
 def tab3():
     st.markdown("#### 🪄 자동 일정 생성")
 
-    col_left, col_right = st.columns([1.2, 1])
+    col_left, col_right = st.columns([1, 1])
     with col_left:
         method = st.selectbox("입력 유형을 선택하세요", [
             "Kick-off + 발주 마감일",
@@ -52,8 +52,11 @@ def tab3():
         total_days = (po_date - kickoff_date).days
 
     if kickoff_date and po_date and total_days is not None and working_days is not None:
-        st.success(f"📆 시즌: {season} / 기간: {total_days}일 / 영업일: {working_days}일")
-        st.success(f"📅 Kick-off: {kickoff_date} / 발주 마감일: {po_date}")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.success(f"📆 시즌: {season} / 기간: {total_days}일 / 영업일: {working_days}일")
+        with col2:
+            st.success(f"📅 Kick-off: {kickoff_date} / 발주 마감일: {po_date}")
 
         df = load_standard_offsets()
         scaling_ratio = working_days / 150
