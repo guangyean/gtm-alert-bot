@@ -6,6 +6,7 @@ from utils import to_excel, load_holidays, load_standard_offsets
 from Schedule_DB import users
 from db import insert_schedule
 from datetime import datetime
+from pytz import timezone
 
 def tab3():
     st.markdown("#### 🪄 자동 일정 생성")
@@ -122,8 +123,22 @@ def tab3():
             if st.button("📤 일정 DB에 추가"):
                 upload_df = df.rename(columns={"업무명": "task"})[
                     ["시즌", "task", "시작일", "마감일", "주요담당팀",
-                     "person1", "person1_email", "person2", "person2_email", "비고"]
-                ]
-                for row in upload_df.itertuples():
-                    insert_schedule(row._asdict())
-                st.success("✅ 일정이 데이터베이스에 추가되었습니다.")
+                    "person1", "person1_email", "person2", "person2_email", "비고"]
+                ].rename(columns={
+                    "시즌": "season",
+                    "시작일": "start_date",
+                    "마감일": "due_date",
+                    "주요담당팀": "team",
+                    "비고": "note"
+                })
+
+        # ✅ 여기서 created_at, updated_at 추가!
+        kst = timezone("Asia/Seoul")
+        now_str = datetime.now(kst).strftime("%Y-%m-%d %H:%M:%S")
+        upload_df["created_at"] = now_str
+        upload_df["updated_at"] = ""
+
+        for row in upload_df.itertuples(index=False):
+            insert_schedule(row._asdict())
+
+        st.success("✅ 일정이 데이터베이스에 추가되었습니다.")
