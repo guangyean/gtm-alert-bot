@@ -146,3 +146,5 @@ def tab3():
                     except Exception as e:
                         st.error(f"❌ 삽입 실패: {e}")
                 st.success("✅ 일정이 데이터베이스에 추가되었습니다.")
+                time.sleep(1)
+                st.rerun()

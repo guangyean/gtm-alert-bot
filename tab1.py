@@ -6,6 +6,11 @@ from pytz import timezone
 
 def tab1(df):
         #st.write("🧪 tab1()에서 받은 df 크기:", df.shape)
+        df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce")
+        df["updated_at"] = pd.to_datetime(df["updated_at"], errors="coerce")
+
+        df["created_at_date"] = df["created_at"].dt.date
+        df["updated_at_date"] = df["updated_at"].dt.date
         today = datetime.now(timezone("Asia/Seoul")).date()
         yesterday = today - timedelta(days=1)
         col_left, col_right = st.columns([2, 1])
