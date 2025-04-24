@@ -132,13 +132,14 @@ def tab3():
                     "비고": "note"
                 })
 
-        # ✅ 여기서 created_at, updated_at 추가!
-        kst = timezone("Asia/Seoul")
-        now_str = datetime.now(kst).strftime("%Y-%m-%d %H:%M:%S")
-        upload_df["created_at"] = now_str
-        upload_df["updated_at"] = ""
+                # ✅ 여기서 created_at, updated_at 추가!
+                kst = timezone("Asia/Seoul")
+                now_str = datetime.now(kst).strftime("%Y-%m-%d %H:%M:%S")
+                
+                upload_df["created_at"] = now_str
+                upload_df["updated_at"] = ""
 
-        for row in upload_df.itertuples(index=False):
-            insert_schedule(row._asdict())
+                for row in upload_df.itertuples(index=False):
+                    insert_schedule(row._asdict())
 
-        st.success("✅ 일정이 데이터베이스에 추가되었습니다.")
+                st.success("✅ 일정이 데이터베이스에 추가되었습니다.")
