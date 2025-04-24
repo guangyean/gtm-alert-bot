@@ -65,51 +65,60 @@ def tab3():
         standard_df["note"] = "자동 생성 일정"
 
         user_df = pd.DataFrame(users, columns=["name", "email", "team"])
-        selected_people = []
-        st.markdown("### 담당자 지정")
-        for idx, row in standard_df.iterrows():
+        default_person = user_df.iloc[0]
+
+        st.markdown("### 📋 자동 생성 일정")
+
+        assigned_names = []
+        assigned_emails = []
+
+        for idx in range(len(standard_df)):
+            row = standard_df.iloc[idx]
             team = row.get("주요담당팀", "전체 사업부")
             available = user_df[user_df["team"] == team]
 
-            if not available.empty:
-                person_options = {
-                    f"{u['name']} ({u['email']})": (u['name'], u['email'])
-                    for _, u in available.iterrows()
-                }
-                keys = list(person_options.keys())
-                default_key = keys[0] if keys else None
-            else:
-                default_key = f"{user_df.iloc[0]['name']} ({user_df.iloc[0]['email']})"
-                person_options = {default_key: (user_df.iloc[0]['name'], user_df.iloc[0]['email'])}
+            person_options = {
+                f"{r['name']} ({r['email']})": (r['name'], r['email'])
+                for _, r in available.iterrows()
+            } if not available.empty else {
+                f"{default_person['name']} ({default_person['email']})": (default_person['name'], default_person['email'])
+            }
 
+            default_key = list(person_options.keys())[0]
             selected_key = st.selectbox(
-                f"{row['Task 이름']} 담당자 선택:",
-                list(person_options.keys()),
+                label=f"🧑 담당자 선택 - {row['Task 이름']}",
+                options=list(person_options.keys()),
                 index=0,
-                key=f"person_{idx}"
+                key=f"person_select_{idx}"
             )
-            name, email = person_options.get(selected_key, ("", ""))
-            selected_people.append((name, email))
+            name, email = person_options[selected_key]
+            assigned_names.append(name)
+            assigned_emails.append(email)
 
         standard_df["team"] = standard_df["주요담당팀"].fillna("전체 사업부")
-        standard_df["person1"] = [name for name, _ in selected_people]
-        standard_df["person1_email"] = [email for _, email in selected_people]
+        standard_df["담당자"] = assigned_names
+        standard_df["이메일"] = assigned_emails
+        standard_df["person1"] = assigned_names
+        standard_df["person1_email"] = assigned_emails
         standard_df["person2"] = ""
         standard_df["person2_email"] = ""
 
-        preview_df = standard_df.rename(columns={
-            "Task 이름": "task"
+        display_df = standard_df.rename(columns={
+            "Task 이름": "업무명",
+            "season": "시즌",
+            "start_date": "시작일",
+            "due_date": "마감일",
+            "team": "담당팀",
+            "note": "비고"
         })[
-            ["season", "task", "start_date", "due_date", "team",
-             "person1", "person1_email", "person2", "person2_email", "note"]
+            ["시즌", "업무명", "시작일", "마감일", "담당팀", "담당자", "이메일", "비고"]
         ]
 
-        with st.expander("📄 생성된 일정 미리보기", expanded=True):
-            st.dataframe(preview_df, use_container_width=True, height=700)
+        st.dataframe(display_df, use_container_width=True, height=700)
 
         col_left, col_right = st.columns([1, 1])
         with col_left:
-            excel_bytes = to_excel(preview_df)
+            excel_bytes = to_excel(display_df)
             st.download_button(
                 label="⬇️ 엑셀로 저장",
                 data=excel_bytes,
@@ -118,6 +127,10 @@ def tab3():
             )
         with col_right:
             if st.button("📤 일정 DB에 추가"):
-                for row in preview_df.itertuples():
+                upload_df = standard_df.rename(columns={"Task 이름": "task"})[
+                    ["season", "task", "start_date", "due_date", "team",
+                     "person1", "person1_email", "person2", "person2_email", "note"]
+                ]
+                for row in upload_df.itertuples():
                     insert_schedule(row._asdict())
                 st.success("✅ 일정이 데이터베이스에 추가되었습니다.")
