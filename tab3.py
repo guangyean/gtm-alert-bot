@@ -71,7 +71,7 @@ def tab3():
         }
         person_keys = list(person_dict.keys())
 
-        df = df[["시즌", "Task 이름", "주요담당팀", "담당자", "표준 오프셋", "신규 D-day", "시작일", "마감일",  "비고"]].rename(columns={"Task 이름": "업무명"})
+        df = df[["시즌", "Task 이름", "주요담당팀", "담당자", "표준 오프셋", "신규 D-day", "시작일", "마감일", "비고"]].rename(columns={"Task 이름": "업무명"})
 
         df = st.data_editor(
             df,
@@ -92,7 +92,7 @@ def tab3():
             excel_bytes = to_excel(df.rename(columns={
                 "업무명": "Task 이름",
                 "person1_email": "이메일"
-            })[["시즌", "업무명", "시작일", "마감일", "주요담당팀", "담당자", "이메일", "비고"]])
+            })[["시즌", "Task 이름", "시작일", "마감일", "주요담당팀", "담당자", "이메일", "비고"]])
             st.download_button(
                 label="⬇️ 엑셀로 저장",
                 data=excel_bytes,
