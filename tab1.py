@@ -5,7 +5,7 @@ from utils import to_excel
 from pytz import timezone
 
 def tab1(df):
-        st.write("🧪 tab1()에서 받은 df 크기:", df.shape)
+        #st.write("🧪 tab1()에서 받은 df 크기:", df.shape)
         today = datetime.now(timezone("Asia/Seoul")).date()
         yesterday = today - timedelta(days=1)
 
