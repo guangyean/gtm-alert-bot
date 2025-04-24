@@ -46,7 +46,7 @@ def tab3():
         st.success(f"📅 Kick-off: {kickoff_date} / 발주 마감일: {po_date}")
 
         standard_df = load_standard_offsets()
-        scaling_ratio = working_days / 150  # 고정 기준일
+        scaling_ratio = working_days / 150
         standard_df["신규 오프셋"] = (standard_df["표준 오프셋"] * scaling_ratio).round().astype(int)
 
         standard_df["실제 일정"] = [
@@ -56,8 +56,7 @@ def tab3():
         ]
 
         if "LEVEL" in standard_df.columns:
-            standard_df = standard_df[standard_df["LEVEL"] <= 2]
-            standard_df = standard_df.sort_index().reset_index(drop=True)
+            standard_df = standard_df[standard_df["LEVEL"] <= 2].reset_index(drop=True)
 
         standard_df["season"] = season
         standard_df["start_date"] = kickoff_date.strftime("%Y-%m-%d")
@@ -70,19 +69,18 @@ def tab3():
             f"{r['name']} ({r['email']})": (r['name'], r['email'])
             for _, r in user_df.iterrows()
         }
+        person_keys = list(person_dict.keys())
 
-        st.markdown("### 📋 자동 생성 일정")
+        # Insert a "담당자 선택" column into the DataFrame as dropdown editors
+        person_selection = []
+        for i, row in standard_df.iterrows():
+            key = f"select_{i}"
+            selected = st.selectbox(f"{row['Task 이름']} 담당자", person_keys, key=key)
+            name, email = person_dict[selected]
+            person_selection.append((name, email))
 
-        # Drop-down selector inside the table for each task
-        for idx in range(len(standard_df)):
-            person_key = st.selectbox(
-                label=f"🧑 담당자 선택 - {standard_df.loc[idx, 'Task 이름']}",
-                options=list(person_dict.keys()),
-                index=0,
-                key=f"person_dropdown_{idx}"
-            )
-            standard_df.loc[idx, "person1"], standard_df.loc[idx, "person1_email"] = person_dict[person_key]
-
+        standard_df["person1"] = [name for name, _ in person_selection]
+        standard_df["person1_email"] = [email for _, email in person_selection]
         standard_df["person2"] = ""
         standard_df["person2_email"] = ""
 
