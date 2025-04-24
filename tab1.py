@@ -11,6 +11,9 @@ def tab1(df):
         st.info(f"📌오늘 추가: {sum(df['created_at_date'] == today)}건 / 수정: {sum(df['updated_at_date'] == today)}건")
         st.info(f"📌어제 추가: {sum(df['created_at_date'] == yesterday)}건 / 수정: {sum(df['updated_at_date'] == yesterday)}건")
 
+        if st.query_params.get("filter", [""])[0] == "changed":
+            st.info("📑 어제 추가/수정된 일정만 표시 중입니다.")
+
         filter_col, button_col = st.columns([16, 1.2])
         with filter_col:
             team_filter = st.multiselect("팀 선택", df["team"].unique(), default=list(df["team"].unique()))
