@@ -117,13 +117,17 @@ def main():
     selected_tab = setup_tab_menu(st.session_state.selected_tab)
 
     def reload_df():
-        df = get_cached_schedules()
-        df["D-Day"] = df["due_date"].apply(calculate_d_day)
-        
+        filter_param = st.query_params.get("filter", [""])[0]
+
+        if filter_param == "changed":
+            df = load_schedules()  # 캐시 안 씀
+        else:
+            df = get_cached_schedules()  # 캐시 사용
+
+        df["D-Day"] = df["due_date"].apply(calculate_d_day) 
         df["created_at_date"] = pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce").dt.date
         df["updated_at_date"] = pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce").dt.date
 
-        filter_param = st.query_params.get("filter", [""])[0]
         if filter_param == "changed":
             today = datetime.now(pytz.timezone("Asia/Seoul")).date()
             yesterday = today - timedelta(days=1)
