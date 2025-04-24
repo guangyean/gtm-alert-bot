@@ -63,43 +63,26 @@ def tab3():
         standard_df["start_date"] = kickoff_date.strftime("%Y-%m-%d")
         standard_df["due_date"] = standard_df["실제 일정"]
         standard_df["note"] = "자동 생성 일정"
+        standard_df["team"] = standard_df["주요담당팀"].fillna("전체 사업부")
 
         user_df = pd.DataFrame(users, columns=["name", "email", "team"])
-        default_person = user_df.iloc[0]
+        person_dict = {
+            f"{r['name']} ({r['email']})": (r['name'], r['email'])
+            for _, r in user_df.iterrows()
+        }
 
         st.markdown("### 📋 자동 생성 일정")
 
-        assigned_names = []
-        assigned_emails = []
-
+        # Drop-down selector inside the table for each task
         for idx in range(len(standard_df)):
-            row = standard_df.iloc[idx]
-            team = row.get("주요담당팀", "전체 사업부")
-            available = user_df[user_df["team"] == team]
-
-            person_options = {
-                f"{r['name']} ({r['email']})": (r['name'], r['email'])
-                for _, r in available.iterrows()
-            } if not available.empty else {
-                f"{default_person['name']} ({default_person['email']})": (default_person['name'], default_person['email'])
-            }
-
-            default_key = list(person_options.keys())[0]
-            selected_key = st.selectbox(
-                label=f"🧑 담당자 선택 - {row['Task 이름']}",
-                options=list(person_options.keys()),
+            person_key = st.selectbox(
+                label=f"🧑 담당자 선택 - {standard_df.loc[idx, 'Task 이름']}",
+                options=list(person_dict.keys()),
                 index=0,
-                key=f"person_select_{idx}"
+                key=f"person_dropdown_{idx}"
             )
-            name, email = person_options[selected_key]
-            assigned_names.append(name)
-            assigned_emails.append(email)
+            standard_df.loc[idx, "person1"], standard_df.loc[idx, "person1_email"] = person_dict[person_key]
 
-        standard_df["team"] = standard_df["주요담당팀"].fillna("전체 사업부")
-        standard_df["담당자"] = assigned_names
-        standard_df["이메일"] = assigned_emails
-        standard_df["person1"] = assigned_names
-        standard_df["person1_email"] = assigned_emails
         standard_df["person2"] = ""
         standard_df["person2_email"] = ""
 
@@ -109,6 +92,8 @@ def tab3():
             "start_date": "시작일",
             "due_date": "마감일",
             "team": "담당팀",
+            "person1": "담당자",
+            "person1_email": "이메일",
             "note": "비고"
         })[
             ["시즌", "업무명", "시작일", "마감일", "담당팀", "담당자", "이메일", "비고"]
