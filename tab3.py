@@ -78,7 +78,7 @@ def tab3():
             column_config={
                 "담당자": st.column_config.SelectboxColumn("담당자", options=person_keys)
             },
-            use_container_width=True,
+            use_container_width=True, height = 900
             num_rows="dynamic"
         )
 
