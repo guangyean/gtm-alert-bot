@@ -71,31 +71,36 @@ def tab3():
         }
         person_keys = list(person_dict.keys())
 
-        st.markdown("### 🧑 각 일정에 담당자 개별 선택")
-        col1, col2 = st.columns([5, 2])
+        st.markdown("### ✏️ 담당자 직접 선택 (표 안 드롭다운)")
 
-        person_selection = []
-        with col1:
-            st.dataframe(
-                standard_df.rename(columns={
-                    "Task 이름": "업무명",
-                    "표준 오프셋": "표준 D-day",
-                    "신규 오프셋": "신규 D-day",
-                    "실제 일정": "마감일"
-                })[["업무명", "신규 D-day", "마감일"]].reset_index(drop=True),
-                use_container_width=True
-            )
+        # 드롭다운을 직접 삽입한 편집 가능한 테이블 만들기
+        editor_df = standard_df[["Task 이름", "신규 오프셋", "실제 일정"]].copy()
+        editor_df.rename(columns={
+            "Task 이름": "업무명",
+            "신규 오프셋": "신규 D-day",
+            "실제 일정": "마감일"
+        }, inplace=True)
+        editor_df["담당자"] = ""
 
-        with col2:
-            for i, row in standard_df.iterrows():
-                selected = st.selectbox(
-                    f"{row['Task 이름']} 담당자", person_keys, key=f"select_{i}"
-                )
-                name, email = person_dict[selected]
-                person_selection.append((name, email))
+        edited_df = st.data_editor(
+            editor_df,
+            column_config={
+                "담당자": st.column_config.SelectboxColumn("담당자", options=person_keys)
+            },
+            use_container_width=True,
+            num_rows="dynamic"
+        )
 
-        standard_df["person1"] = [name for name, _ in person_selection]
-        standard_df["person1_email"] = [email for _, email in person_selection]
+        # 선택된 담당자 정보를 mapping
+        selected_names = []
+        selected_emails = []
+        for val in edited_df["담당자"]:
+            name, email = person_dict.get(val, ("", ""))
+            selected_names.append(name)
+            selected_emails.append(email)
+
+        standard_df["person1"] = selected_names
+        standard_df["person1_email"] = selected_emails
         standard_df["person2"] = ""
         standard_df["person2_email"] = ""
 
