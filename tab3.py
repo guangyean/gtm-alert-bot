@@ -68,19 +68,16 @@ def tab3():
 
         df = df[["시즌", "Task 이름", "주요담당팀", "담당자", "표준 오프셋", "신규 D-day", "시작일", "마감일", "비고"]].rename(columns={"Task 이름": "업무명"})
 
-        # 각 행마다 드롭다운 옵션 계산 후 DataFrame에 삽입
-        person_label_dict = {}
+        # generate options per row
         dropdown_options = []
+        person_label_dict = {}
         for idx, row in df.iterrows():
             team = row["주요담당팀"]
-            if team == "전체 사업부":
+            filtered = user_df if team == "전체 사업부" else user_df[user_df["team"] == team]
+            if filtered.empty:
                 filtered = user_df
-            else:
-                filtered = user_df[user_df["team"] == team]
-                if filtered.empty:
-                    filtered = user_df
-            names = [f"{r['name']}" for _, r in filtered.iterrows()]
-            dropdown_options.append(names)
+            team_options = [f"{r['name']}" for _, r in filtered.iterrows()]
+            dropdown_options.append(team_options)
             for _, r in filtered.iterrows():
                 person_label_dict[r["name"]] = (r["name"], r["email"])
 
