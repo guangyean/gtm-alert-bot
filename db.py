@@ -3,6 +3,8 @@ import gspread
 import pandas as pd
 from datetime import datetime
 from google.oauth2.service_account import Credentials
+from pytz import timezone
+
 
 def get_worksheet():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -22,11 +24,32 @@ def load_schedules():
 
     return df
 
+# def insert_schedule(data: dict):
+#     ws = get_worksheet()
+#     data["created_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#     headers = ws.row_values(1)
+#     row = [data.get(h, "") for h in headers]
+#     ws.append_row(row)
+
 def insert_schedule(data: dict):
     ws = get_worksheet()
-    data["created_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    headers = ws.row_values(1)
-    row = [data.get(h, "") for h in headers]
+    kst = timezone("Asia/Seoul")
+    data["created_at"] = datetime.now(kst).strftime("%Y-%m-%d %H:%M:%S")
+
+    row = [
+        data.get("season", ""),
+        data.get("task", ""),
+        data.get("start_date", ""),
+        data.get("due_date", ""),
+        data.get("team", ""),
+        data.get("person1", ""),
+        data.get("person1_email", ""),
+        data.get("person2", ""),
+        data.get("person2_email", ""),
+        data.get("note", ""),
+        data["created_at"],
+        data.get("updated_at", "")
+    ]
     ws.append_row(row)
 
 def update_schedule(season: str, task: str, updates: dict):
