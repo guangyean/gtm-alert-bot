@@ -17,7 +17,7 @@ def tab1(df):
             if st.query_params.get("filter", [""])[0] == "changed":
                 st.info("📑 어제 추가/수정된 일정만 표시 중입니다.")
 
-            filter_col, button_col = st.columns([16, 1.2])
+            filter_col, button_col = st.columns([16, 1.5])
             with filter_col:
                 team_filter = st.multiselect("팀 선택", df["team"].unique(), default=list(df["team"].unique()))
             df["team"] = df["team"].astype(str).str.strip()
