@@ -66,8 +66,16 @@ def get_cached_schedules():
     return load_schedules()
 
 def reload_df():
-    filter_param = st.query_params.get("filter", [""])[0]
+    
+    raw_filter = st.query_params.get("filter", "")
+    if isinstance(raw_filter, list):
+        filter_param = "".join(raw_filter)  # 글자 단위 리스트일 경우 대응
+    else:
+        filter_param = raw_filter
 
+# 유효성 검증
+    if filter_param != "changed":
+        filter_param = ""
     if filter_param == "changed":
         df = load_schedules()
     else:
