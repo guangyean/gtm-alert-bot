@@ -61,38 +61,32 @@ def tab3():
         df["시즌"] = season
         df["시작일"] = kickoff_date.strftime("%Y-%m-%d")
         df["비고"] = "자동 생성 일정"
-        df["담당팀"] = df["주요담당팀"].fillna("전체 사업부")
+        df["주요담당팀"] = df["주요담당팀"].fillna("전체 사업부")
         df["담당자"] = ""
 
         user_df = pd.DataFrame(users, columns=["name", "email", "team"])
+        person_options = [
+            f"{row['name']} ({row['email']})" for _, row in user_df.iterrows()
+        ]
+        person_dict = {
+            f"{row['name']} ({row['email']})": (row['name'], row['email'])
+            for _, row in user_df.iterrows()
+        }
 
         df = df[["시즌", "Task 이름", "주요담당팀", "담당자", "표준 오프셋", "신규 D-day", "시작일", "마감일", "비고"]].rename(columns={"Task 이름": "업무명"})
-
-        # generate options per row
-        dropdown_options = []
-        person_label_dict = {}
-        for idx, row in df.iterrows():
-            team = row["주요담당팀"]
-            filtered = user_df if team == "전체 사업부" else user_df[user_df["team"] == team]
-            if filtered.empty:
-                filtered = user_df
-            team_options = [f"{r['name']}" for _, r in filtered.iterrows()]
-            dropdown_options.append(team_options)
-            for _, r in filtered.iterrows():
-                person_label_dict[r["name"]] = (r["name"], r["email"])
 
         df = st.data_editor(
             df,
             column_config={
-                "담당자": st.column_config.SelectboxColumn("담당자", options=dropdown_options)
+                "담당자": st.column_config.SelectboxColumn("담당자", options=person_options)
             },
             use_container_width=True,
             num_rows="dynamic",
             height=900
         )
 
-        df["person1"] = df["담당자"].apply(lambda x: person_label_dict.get(x, ("", ""))[0])
-        df["person1_email"] = df["담당자"].apply(lambda x: person_label_dict.get(x, ("", ""))[1])
+        df["person1"] = df["담당자"].apply(lambda x: person_dict.get(x, ("", ""))[0])
+        df["person1_email"] = df["담당자"].apply(lambda x: person_dict.get(x, ("", ""))[1])
         df["person2"] = ""
         df["person2_email"] = ""
 
