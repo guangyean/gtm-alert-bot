@@ -71,10 +71,8 @@ def tab3():
         }
         person_keys = list(person_dict.keys())
 
-        st.markdown("### ✏️ 담당자 직접 선택 (표 안 드롭다운)")
-
         df = st.data_editor(
-            df.rename(columns={"Task 이름": "업무명"}),
+            df[["표준 오프셋", "신규 D-day", "시즌", "Task 이름", "시작일", "마감일", "주요담당팀", "담당자", "비고"]].rename(columns={"Task 이름": "업무명"}),
             column_config={
                 "담당자": st.column_config.SelectboxColumn("담당자", options=person_keys)
             },
@@ -89,9 +87,10 @@ def tab3():
 
         col_left, col_right = st.columns([1, 1])
         with col_left:
-            excel_bytes = to_excel(df[["시즌", "업무명", "시작일", "마감일", "담당팀", "담당자", "person1_email", "비고"]].rename(columns={
+            excel_bytes = to_excel(df.rename(columns={
+                "업무명": "Task 이름",
                 "person1_email": "이메일"
-            }))
+            })[["시즌", "업무명", "시작일", "마감일", "주요담당팀", "담당자", "이메일", "비고"]])
             st.download_button(
                 label="⬇️ 엑셀로 저장",
                 data=excel_bytes,
@@ -100,8 +99,8 @@ def tab3():
             )
         with col_right:
             if st.button("📤 일정 DB에 추가"):
-                upload_df = df.rename(columns={"Task 이름": "task"})[
-                    ["시즌", "task", "시작일", "마감일", "담당팀",
+                upload_df = df.rename(columns={"업무명": "task"})[
+                    ["시즌", "task", "시작일", "마감일", "주요담당팀",
                      "person1", "person1_email", "person2", "person2_email", "비고"]
                 ]
                 for row in upload_df.itertuples():
