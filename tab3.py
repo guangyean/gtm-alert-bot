@@ -25,7 +25,7 @@ def tab3():
 
 
     if method == "Kick-off + 전체 기간(일)":
-        col1, col2 = st.column(2)
+        col1, col2 = st.columns(2)
         with col1:
             kickoff_date = st.date_input("Kick-off 날짜 입력")
         with col2:
@@ -34,7 +34,7 @@ def tab3():
         working_days = np.busday_count(kickoff_date, po_date, holidays=holiday_np)
 
     elif method == "발주 마감일 + 전체 기간(일)":
-        col1, col2 = st.column(2)
+        col1, col2 = st.columns(2)
         with col1:
             po_date = st.date_input("발주 마감일 입력")
         with col2:
@@ -43,10 +43,10 @@ def tab3():
         working_days = np.busday_count(kickoff_date, po_date, holidays=holiday_np)
 
     elif method == "Kick-off + 발주 마감일":
-        col1, col2 = st.column(2)
+        col1, col2 = st.columns(2)
         with col1:
             kickoff_date = st.date_input("Kick-off 날짜 입력")
-        with col1:
+        with col2:
             po_date = st.date_input("발주 마감일 입력")
         working_days = np.busday_count(kickoff_date, po_date, holidays=holiday_np)
         total_days = (po_date - kickoff_date).days
