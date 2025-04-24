@@ -74,16 +74,33 @@ def reload_df():
         df = get_cached_schedules()
 
     df["due_date"] = pd.to_datetime(df.get("due_date"), errors="coerce")
-    df["created_at_date"] = pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce").dt.date
-    df["updated_at_date"] = pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce").dt.date
+
+    # ✅ 시간대 변환 다시 적용 (UTC → KST)
+    seoul = pytz.timezone("Asia/Seoul")
+    df["created_at_date"] = (
+        pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce")
+        .dt.tz_localize("UTC")
+        .dt.tz_convert(seoul)
+        .dt.date
+    )
+    df["updated_at_date"] = (
+        pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce")
+        .dt.tz_localize("UTC")
+        .dt.tz_convert(seoul)
+        .dt.date
+    )
 
     if filter_param == "changed":
-        today = datetime.now(pytz.timezone("Asia/Seoul")).date()
+        today = datetime.now(seoul).date()
         yesterday = today - timedelta(days=1)
         df = df[(df["created_at_date"] == yesterday) | (df["updated_at_date"] == yesterday)]
 
     df["D-Day"] = df["due_date"].apply(calculate_d_day)
+
+    st.write("🧪 filter_param:", filter_param)
+    st.write("🧪 최종 df 행 개수:", df.shape[0])
     return df
+
 
 
 def main():
