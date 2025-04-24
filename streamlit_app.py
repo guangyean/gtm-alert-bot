@@ -84,7 +84,7 @@ def reload_df():
 
     # ✅ Convert to KST
     seoul = pytz.timezone("Asia/Seoul")
-    
+
     df["created_at_date"] = (
     pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce")
     .dt.tz_localize("Asia/Seoul", ambiguous='NaT')  # assume KST
@@ -104,8 +104,6 @@ def reload_df():
 
     df["D-Day"] = df["due_date"].apply(calculate_d_day)
 
-    st.write("🧪 filter_param:", filter_param)
-    st.write("🧪 최종 df 행 개수:", df.shape[0])
     return df
 
 
