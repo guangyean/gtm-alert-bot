@@ -75,11 +75,21 @@ def tab2(df):
                     st.error(f"❌ 예외 발생: {e}")
 
         with col2:
+            # if st.button("🗑️ 삭제"):
+            #     delete_schedule(row["season"], row["task"])
+            #     st.toast("✅ 삭제 완료")
+            #     time.sleep(1)
+            #     st.rerun()
             if st.button("🗑️ 삭제"):
-                delete_schedule(row["season"], row["task"])
-                st.toast("✅ 삭제 완료")
-                time.sleep(1)
-                st.rerun()
+                try:
+                    delete_schedule(row["season"], row["task"])
+                    st.session_state.selected_label = None  # 🔁 선택 리셋
+                    st.cache_data.clear()  # 🔄 캐시 갱신
+                    st.toast("✅ 삭제 완료")
+                    time.sleep(1)
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ 삭제 실패: {e}")
 
         # 💡 수정 성공 후 보여줄 알림 발송 버튼
         if st.session_state.get("updated_schedule"):
