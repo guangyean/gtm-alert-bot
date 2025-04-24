@@ -12,13 +12,15 @@ def tab3():
 
     col_left, col_right = st.columns([1, 1])
     with col_left:
-        method = st.selectbox("입력 유형을 선택하세요", [
-            "Kick-off + 발주 마감일",
-            "Kick-off + 전체 기간(일)",
-            "발주 마감일 + 전체 기간(일)"
-        ])
-
-        season = st.selectbox("시즌 선택", ["25SS", "25FW", "26SS", "26FW", "27SS", "27FW"], index=2)
+        col1, col2 = st.columns(2)
+        with col1:
+            method = st.selectbox("입력 유형을 선택하세요", [
+                "Kick-off + 발주 마감일",
+                "Kick-off + 전체 기간(일)",
+                "발주 마감일 + 전체 기간(일)"
+            ])
+        with col2:
+            season = st.selectbox("시즌 선택", ["25SS", "25FW", "26SS", "26FW", "27SS", "27FW"], index=2)
 
     holiday_np = load_holidays()
     kickoff_date, po_date, total_days, working_days = None, None, None, None
