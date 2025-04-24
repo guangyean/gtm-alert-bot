@@ -91,6 +91,6 @@ def tab3():
         st.download_button(
             label="⬇️ 저장",
             data=excel_bytes,
-            file_name="Auto_GTM_Schedule.xlsx",
+            file_name = f"Auto_GTM_{season}_{method.replace(' ', '_')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
