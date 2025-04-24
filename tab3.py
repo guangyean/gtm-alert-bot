@@ -131,7 +131,7 @@ def tab3():
                     "주요담당팀": "team",
                     "비고": "note"
                 })
-
+            
                 # ✅ 여기서 created_at, updated_at 추가!
                 kst = timezone("Asia/Seoul")
                 now_str = datetime.now(kst).strftime("%Y-%m-%d %H:%M:%S")
@@ -140,6 +140,9 @@ def tab3():
                 upload_df["updated_at"] = ""
 
                 for row in upload_df.itertuples(index=False):
-                    insert_schedule(row._asdict())
-
+                    try:
+                        insert_schedule(row._asdict())
+                        time.sleep(0.3)  # Google API rate limit 방지
+                    except Exception as e:
+                        st.error(f"❌ 삽입 실패: {e}")
                 st.success("✅ 일정이 데이터베이스에 추가되었습니다.")
