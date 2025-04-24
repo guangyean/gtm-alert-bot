@@ -66,31 +66,32 @@ def tab3():
 
         user_df = pd.DataFrame(users, columns=["name", "email", "team"])
 
-        options_list = []
+        df = df[["시즌", "Task 이름", "주요담당팀", "담당자", "표준 오프셋", "신규 D-day", "시작일", "마감일", "비고"]].rename(columns={"Task 이름": "업무명"})
+
+        # 각 행마다 드롭다운 옵션 계산 후 DataFrame에 삽입
         person_label_dict = {}
-        for _, row in df.iterrows():
+        dropdown_options = []
+        for idx, row in df.iterrows():
             team = row["주요담당팀"]
             if team == "전체 사업부":
-                available = user_df
+                filtered = user_df
             else:
-                available = user_df[user_df["team"] == team]
-                if available.empty:
-                    available = user_df  # fallback if team not found
-            labels = [f"{r['name']} ({r['email']})" for _, r in available.iterrows()]
-            options_list.append(labels)
-            for label in labels:
-                name, email = label.split(" (")
-                person_label_dict[label] = (name, email.rstrip(")"))
-
-        df = df[["시즌", "Task 이름", "주요담당팀", "담당자", "표준 오프셋", "신규 D-day", "시작일", "마감일", "비고"]].rename(columns={"Task 이름": "업무명"})
+                filtered = user_df[user_df["team"] == team]
+                if filtered.empty:
+                    filtered = user_df
+            names = [f"{r['name']}" for _, r in filtered.iterrows()]
+            dropdown_options.append(names)
+            for _, r in filtered.iterrows():
+                person_label_dict[r["name"]] = (r["name"], r["email"])
 
         df = st.data_editor(
             df,
             column_config={
-                "담당자": st.column_config.SelectboxColumn("담당자", options=options_list)
+                "담당자": st.column_config.SelectboxColumn("담당자", options=dropdown_options)
             },
             use_container_width=True,
-            num_rows="dynamic"
+            num_rows="dynamic",
+            height=900
         )
 
         df["person1"] = df["담당자"].apply(lambda x: person_label_dict.get(x, ("", ""))[0])
