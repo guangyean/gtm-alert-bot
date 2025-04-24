@@ -1,11 +1,11 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-from datetime import timedelta
+import time
+from datetime import timedelta, datetime
 from utils import to_excel, load_holidays, load_standard_offsets
 from Schedule_DB import users
 from db import insert_schedule
-from datetime import datetime
 from pytz import timezone
 
 def tab3():
@@ -21,7 +21,7 @@ def tab3():
                 "발주 마감일 + 전체 기간(일)"
             ])
         with col2:
-            season = st.selectbox("시즌 선택", ["25SS", "25FW", "26SS", "26FW", "27SS", "27FW"], index=2)
+            season = st.selectbox("시즌 선택", ["26SS", "26FW", "27SS", "27FW"], index=2)
 
     holiday_np = load_holidays()
     kickoff_date, po_date, total_days, working_days = None, None, None, None
