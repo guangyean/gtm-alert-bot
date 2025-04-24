@@ -61,85 +61,49 @@ def setup_tab_menu(default_tab):
 
     return selected_value
 
+@st.cache_data(ttl=300)
+def get_cached_schedules():
+    return load_schedules()
+
+def reload_df():
+    filter_param = st.query_params.get("filter", [""])[0]
+
+    if filter_param == "changed":
+        df = load_schedules()
+    else:
+        df = get_cached_schedules()
+
+    df["due_date"] = pd.to_datetime(df.get("due_date"), errors="coerce")
+    df["created_at_date"] = pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce").dt.date
+    df["updated_at_date"] = pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce").dt.date
+
+    if filter_param == "changed":
+        today = datetime.now(pytz.timezone("Asia/Seoul")).date()
+        yesterday = today - timedelta(days=1)
+        df = df[(df["created_at_date"] == yesterday) | (df["updated_at_date"] == yesterday)]
+
+    df["D-Day"] = df["due_date"].apply(calculate_d_day)
+    return df
+
+
 def main():
     st.set_page_config("📅 GTM 일정 대시보드", layout="wide")
     st.title("📅 GTM 일정 관리 대시보드")
 
     init_session_state()
 
-
-    @st.cache_data(ttl=300)
-    def get_cached_schedules():
-        return load_schedules()
-
-    df = get_cached_schedules()
-
-    if df.empty:
-        st.warning("데이터가 없습니다.")
-        return
-
-    df["D-Day"] = df["due_date"].apply(calculate_d_day)
-    #df["created_at_date"] = pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce").dt.date
-    #df["updated_at_date"] = pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce").dt.date
-    
-    seoul = pytz.timezone("Asia/Seoul")
-
-    df["created_at_date"] = (
-        pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce")
-        .dt.tz_localize("UTC")
-        .dt.tz_convert(seoul)
-        .dt.date
-    )
-    df["updated_at_date"] = (
-        pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce")
-        .dt.tz_localize("UTC")
-        .dt.tz_convert(seoul)
-        .dt.date
-    )
-
     query_params = st.query_params
-    tab_param = query_params.get("tab", ["view"])
-    if isinstance(tab_param, list):
-        tab_param = tab_param[0]
+    tab_param = query_params.get("tab", ["view"])[0]
 
     if "selected_tab" not in st.session_state:
         st.session_state.selected_tab = tab_param
 
-    filter_mode = query_params.get("filter", "")
-    if isinstance(filter_mode, list):
-        filter_mode = filter_mode[0]
-
-    if filter_mode == "changed":
-        today = datetime.today().date()
-        yesterday = today - timedelta(days=1)
-        df = df[(df["created_at_date"] == yesterday) | (df["updated_at_date"] == yesterday)]
-
     selected_tab = setup_tab_menu(st.session_state.selected_tab)
+    df_reload = reload_df()
 
-    def reload_df():
-        filter_param = st.query_params.get("filter", [""])[0]
-
-        if filter_param == "changed":
-            df = load_schedules()  # 캐시 안 씀
-        else:
-            df = get_cached_schedules()  # 캐시 사용
-
-        df["D-Day"] = df["due_date"].apply(calculate_d_day) 
-        df["created_at_date"] = pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce").dt.date
-        df["updated_at_date"] = pd.to_datetime(df.get("updated_at", pd.NaT), errors="coerce").dt.date
-
-        if filter_param == "changed":
-            today = datetime.now(pytz.timezone("Asia/Seoul")).date()
-            yesterday = today - timedelta(days=1)
-            df = df[(df["created_at_date"] == yesterday) | (df["updated_at_date"] == yesterday)]
-
-        return df
-    
     if selected_tab == "view":
-        df_reload = reload_df()
         tab1(df_reload)
     elif selected_tab == "edit":
-        df_reload = reload_df() 
         tab2(df_reload)
     elif selected_tab == "generate":
         tab3()
