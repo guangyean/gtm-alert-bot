@@ -10,8 +10,8 @@ from datetime import datetime
 def tab3():
     st.markdown("#### 🪄 자동 일정 생성")
 
-    col_left, col_mid, col_right = st.columns([1, 4, 1])
-    with col_mid:
+    col_left, col_right = st.columns([2, 1])
+    with col_left:
         col1, col2 = st.columns(2)
         with col1:
             method = st.selectbox("입력 유형을 선택하세요", [
@@ -25,8 +25,8 @@ def tab3():
     holiday_np = load_holidays()
     kickoff_date, po_date, total_days, working_days = None, None, None, None
 
-    col_left, col_mid, col_right = st.columns([1, 4, 1])
-    with col_mid:
+    col_left, col_right = st.columns([2, 1])
+    with col_left:
         if method == "Kick-off + 전체 기간(일)":
             col1, col2 = st.columns(2)
             with col1:
