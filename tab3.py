@@ -23,21 +23,31 @@ def tab3():
     holiday_np = load_holidays()
     kickoff_date, po_date, total_days, working_days = None, None, None, None
 
+
     if method == "Kick-off + 전체 기간(일)":
-        kickoff_date = st.date_input("Kick-off 날짜 입력")
-        total_days = st.number_input("전체 기간(일) 입력", min_value=1)
+        col1, col2 = st.column(2)
+        with col1:
+            kickoff_date = st.date_input("Kick-off 날짜 입력")
+        with col2:
+            total_days = st.number_input("전체 기간(일) 입력", min_value=1)
         po_date = kickoff_date + timedelta(days=int(total_days))
         working_days = np.busday_count(kickoff_date, po_date, holidays=holiday_np)
 
     elif method == "발주 마감일 + 전체 기간(일)":
-        po_date = st.date_input("발주 마감일 입력")
-        total_days = st.number_input("전체 기간(일) 입력", min_value=1)
+        col1, col2 = st.column(2)
+        with col1:
+            po_date = st.date_input("발주 마감일 입력")
+        with col2:
+            total_days = st.number_input("전체 기간(일) 입력", min_value=1)   
         kickoff_date = po_date - timedelta(days=int(total_days))
         working_days = np.busday_count(kickoff_date, po_date, holidays=holiday_np)
 
     elif method == "Kick-off + 발주 마감일":
-        kickoff_date = st.date_input("Kick-off 날짜 입력")
-        po_date = st.date_input("발주 마감일 입력")
+        col1, col2 = st.column(2)
+        with col1:
+            kickoff_date = st.date_input("Kick-off 날짜 입력")
+        with col1:
+            po_date = st.date_input("발주 마감일 입력")
         working_days = np.busday_count(kickoff_date, po_date, holidays=holiday_np)
         total_days = (po_date - kickoff_date).days
 
