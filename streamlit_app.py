@@ -66,24 +66,23 @@ def get_cached_schedules():
     return load_schedules()
 
 def reload_df():
-    
     raw_filter = st.query_params.get("filter", "")
+    
+    # Normalize to string and lowercase
     if isinstance(raw_filter, list):
-        filter_param = "".join(raw_filter)  # 글자 단위 리스트일 경우 대응
+        filter_param = "".join(raw_filter).lower().strip()
     else:
-        filter_param = raw_filter
+        filter_param = str(raw_filter).lower().strip()
 
-# 유효성 검증
-    if filter_param != "changed":
-        filter_param = ""
-    if filter_param == "changed":
+    # Load full or filtered data based on query param
+    if "changed" in filter_param:
         df = load_schedules()
     else:
         df = get_cached_schedules()
 
     df["due_date"] = pd.to_datetime(df.get("due_date"), errors="coerce")
 
-    # ✅ 시간대 변환 다시 적용 (UTC → KST)
+    # ✅ Convert to KST
     seoul = pytz.timezone("Asia/Seoul")
     df["created_at_date"] = (
         pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce")
@@ -98,7 +97,7 @@ def reload_df():
         .dt.date
     )
 
-    if filter_param == "changed":
+    if "changed" in filter_param:
         today = datetime.now(seoul).date()
         yesterday = today - timedelta(days=1)
         df = df[(df["created_at_date"] == yesterday) | (df["updated_at_date"] == yesterday)]
@@ -108,6 +107,7 @@ def reload_df():
     st.write("🧪 filter_param:", filter_param)
     st.write("🧪 최종 df 행 개수:", df.shape[0])
     return df
+
 
 
 
