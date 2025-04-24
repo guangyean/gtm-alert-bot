@@ -71,16 +71,12 @@ def tab3():
         }
         person_keys = list(person_dict.keys())
 
-        # Insert a "담당자 선택" column into the DataFrame as dropdown editors
-        person_selection = []
-        for i, row in standard_df.iterrows():
-            key = f"select_{i}"
-            selected = st.selectbox(f"{row['Task 이름']} 담당자", person_keys, key=key)
-            name, email = person_dict[selected]
-            person_selection.append((name, email))
+        st.markdown("### 👤 전체 일정에 기본 담당자 지정")
+        selected_person = st.selectbox("기본 담당자 선택", options=person_keys)
+        default_name, default_email = person_dict[selected_person]
 
-        standard_df["person1"] = [name for name, _ in person_selection]
-        standard_df["person1_email"] = [email for _, email in person_selection]
+        standard_df["person1"] = default_name
+        standard_df["person1_email"] = default_email
         standard_df["person2"] = ""
         standard_df["person2_email"] = ""
 
