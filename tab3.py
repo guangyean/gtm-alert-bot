@@ -145,6 +145,6 @@ def tab3():
                         time.sleep(0.3)  # Google API rate limit 방지
                     except Exception as e:
                         st.error(f"❌ 삽입 실패: {e}")
-                st.success("✅ 일정이 데이터베이스에 추가되었습니다.")
+                st.toast("✅ 일정이 데이터베이스에 추가되었습니다.")
                 time.sleep(1)
                 st.rerun()

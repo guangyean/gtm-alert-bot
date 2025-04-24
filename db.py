@@ -55,21 +55,29 @@ def insert_schedule(data: dict):
 def update_schedule(season: str, task: str, updates: dict):
     ws = get_worksheet()
     df = load_schedules()
-    headers = ws.row_values(1)
-    
+
+    # ✅ 헤더 직접 지정 (READ 요청 제거)
+    COLUMNS = [
+        "season", "task", "start_date", "due_date", "team",
+        "person1", "person1_email", "person2", "person2_email",
+        "note", "created_at", "updated_at"
+    ]
+
     match = df[(df["season"] == season) & (df["task"] == task)]
     if match.empty:
         return False
-    
 
+    row_idx = match.index[0] + 2  # 1행이 헤더니까 실제 행은 +2
 
-    row_idx = match.index[0] + 2
-    updates["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # ✅ updated_at = 한국 시간으로 자동 추가
+    kst = timezone("Asia/Seoul")
+    updates["updated_at"] = datetime.now(kst).strftime("%Y-%m-%d %H:%M:%S")
 
     for key, value in updates.items():
-        if key in headers:
-            col_idx = headers.index(key) + 1
+        if key in COLUMNS:
+            col_idx = COLUMNS.index(key) + 1
             ws.update_cell(row_idx, col_idx, value)
+
     return True
 
 def delete_schedule(season: str, task: str):
