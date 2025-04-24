@@ -16,9 +16,9 @@ def tab2(df):
 
     col_left, col_right = st.columns([2, 1])
     with col_left:
-        col_left, col_right = st.columns(2)
+        col_a, col_b = st.columns(2)
 
-        with col_left:
+        with col_a:
             
             st.markdown("#### ✏️ 일정 수정")
             selected = st.selectbox("수정할 일정 선택", df["label"], index=df["label"].tolist().index(st.session_state.selected_label))
