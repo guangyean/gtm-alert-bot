@@ -65,25 +65,36 @@ def tab3():
         df["담당자"] = ""
 
         user_df = pd.DataFrame(users, columns=["name", "email", "team"])
-        person_dict = {
-            f"{r['name']} ({r['email']})": (r['name'], r['email'])
-            for _, r in user_df.iterrows()
-        }
-        person_keys = list(person_dict.keys())
+
+        options_list = []
+        person_label_dict = {}
+        for _, row in df.iterrows():
+            team = row["주요담당팀"]
+            if team == "전체 사업부":
+                available = user_df
+            else:
+                available = user_df[user_df["team"] == team]
+                if available.empty:
+                    available = user_df  # fallback if team not found
+            labels = [f"{r['name']} ({r['email']})" for _, r in available.iterrows()]
+            options_list.append(labels)
+            for label in labels:
+                name, email = label.split(" (")
+                person_label_dict[label] = (name, email.rstrip(")"))
 
         df = df[["시즌", "Task 이름", "주요담당팀", "담당자", "표준 오프셋", "신규 D-day", "시작일", "마감일", "비고"]].rename(columns={"Task 이름": "업무명"})
 
         df = st.data_editor(
             df,
             column_config={
-                "담당자": st.column_config.SelectboxColumn("담당자", options=person_keys)
+                "담당자": st.column_config.SelectboxColumn("담당자", options=options_list)
             },
-            use_container_width=True, height = 900,
+            use_container_width=True,
             num_rows="dynamic"
         )
 
-        df["person1"] = df["담당자"].apply(lambda x: person_dict.get(x, ("", ""))[0])
-        df["person1_email"] = df["담당자"].apply(lambda x: person_dict.get(x, ("", ""))[1])
+        df["person1"] = df["담당자"].apply(lambda x: person_label_dict.get(x, ("", ""))[0])
+        df["person1_email"] = df["담당자"].apply(lambda x: person_label_dict.get(x, ("", ""))[1])
         df["person2"] = ""
         df["person2_email"] = ""
 
