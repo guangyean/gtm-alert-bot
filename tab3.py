@@ -71,8 +71,10 @@ def tab3():
         }
         person_keys = list(person_dict.keys())
 
+        df = df[["시즌", "Task 이름", "주요담당팀", "담당자", "표준 오프셋", "신규 D-day", "시작일", "마감일",  "비고"]].rename(columns={"Task 이름": "업무명"})
+
         df = st.data_editor(
-            df[["표준 오프셋", "신규 D-day", "시즌", "Task 이름", "시작일", "마감일", "주요담당팀", "담당자", "비고"]].rename(columns={"Task 이름": "업무명"}),
+            df,
             column_config={
                 "담당자": st.column_config.SelectboxColumn("담당자", options=person_keys)
             },
