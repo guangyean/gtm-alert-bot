@@ -45,24 +45,24 @@ def tab3():
         st.success(f"📆 시즌: {season} / 기간: {total_days}일 / 영업일: {working_days}일")
         st.success(f"📅 Kick-off: {kickoff_date} / 발주 마감일: {po_date}")
 
-        standard_df = load_standard_offsets()
+        df = load_standard_offsets()
         scaling_ratio = working_days / 150
-        standard_df["신규 D-day"] = (standard_df["표준 오프셋"] * scaling_ratio).round().astype(int)
+        df["신규 D-day"] = (df["표준 오프셋"] * scaling_ratio).round().astype(int)
 
-        standard_df["마감일"] = [
+        df["마감일"] = [
             np.datetime_as_string(
                 np.busday_offset(po_date, -offset, roll='backward', holidays=holiday_np), unit='D')
-            for offset in standard_df["신규 D-day"]
+            for offset in df["신규 D-day"]
         ]
 
-        if "LEVEL" in standard_df.columns:
-            standard_df = standard_df[standard_df["LEVEL"] <= 2].reset_index(drop=True)
+        if "LEVEL" in df.columns:
+            df = df[df["LEVEL"] <= 2].reset_index(drop=True)
 
-        standard_df["시즌"] = season
-        standard_df["시작일"] = kickoff_date.strftime("%Y-%m-%d")
-        standard_df["비고"] = "자동 생성 일정"
-        standard_df["담당팀"] = standard_df["주요담당팀"].fillna("전체 사업부")
-        standard_df["담당자"] = ""
+        df["시즌"] = season
+        df["시작일"] = kickoff_date.strftime("%Y-%m-%d")
+        df["비고"] = "자동 생성 일정"
+        df["담당팀"] = df["주요담당팀"].fillna("전체 사업부")
+        df["담당자"] = ""
 
         user_df = pd.DataFrame(users, columns=["name", "email", "team"])
         person_dict = {
@@ -73,8 +73,8 @@ def tab3():
 
         st.markdown("### ✏️ 담당자 직접 선택 (표 안 드롭다운)")
 
-        edited_df = st.data_editor(
-            standard_df.rename(columns={"Task 이름": "업무명"}),
+        df = st.data_editor(
+            df.rename(columns={"Task 이름": "업무명"}),
             column_config={
                 "담당자": st.column_config.SelectboxColumn("담당자", options=person_keys)
             },
@@ -82,27 +82,16 @@ def tab3():
             num_rows="dynamic"
         )
 
-        selected_names = []
-        selected_emails = []
-        for val in edited_df["담당자"]:
-            name, email = person_dict.get(val, ("", ""))
-            selected_names.append(name)
-            selected_emails.append(email)
-
-        edited_df["person1"] = selected_names
-        edited_df["person1_email"] = selected_emails
-        edited_df["person2"] = ""
-        edited_df["person2_email"] = ""
-
-        display_df = edited_df[["시즌", "업무명", "시작일", "마감일", "담당팀", "담당자", "person1_email", "비고"]].rename(columns={
-            "person1_email": "이메일"
-        })
-
-        st.dataframe(display_df, use_container_width=True, height=700)
+        df["person1"] = df["담당자"].apply(lambda x: person_dict.get(x, ("", ""))[0])
+        df["person1_email"] = df["담당자"].apply(lambda x: person_dict.get(x, ("", ""))[1])
+        df["person2"] = ""
+        df["person2_email"] = ""
 
         col_left, col_right = st.columns([1, 1])
         with col_left:
-            excel_bytes = to_excel(display_df)
+            excel_bytes = to_excel(df[["시즌", "업무명", "시작일", "마감일", "담당팀", "담당자", "person1_email", "비고"]].rename(columns={
+                "person1_email": "이메일"
+            }))
             st.download_button(
                 label="⬇️ 엑셀로 저장",
                 data=excel_bytes,
@@ -111,7 +100,7 @@ def tab3():
             )
         with col_right:
             if st.button("📤 일정 DB에 추가"):
-                upload_df = edited_df.rename(columns={"Task 이름": "task"})[
+                upload_df = df.rename(columns={"Task 이름": "task"})[
                     ["시즌", "task", "시작일", "마감일", "담당팀",
                      "person1", "person1_email", "person2", "person2_email", "비고"]
                 ]
