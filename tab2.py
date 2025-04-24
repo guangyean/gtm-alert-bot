@@ -14,7 +14,7 @@ def tab2(df):
     if not st.session_state.selected_label or st.session_state.selected_label not in df["label"].values:
         st.session_state.selected_label = df["label"].iloc[0]
 
-    col_left, col_right = st.columns([2,1])
+    col_left, col_right, col_side = st.columns([1,1,1])
 
     with col_left:
         
