@@ -14,7 +14,7 @@ def init_session_state():
         if key not in st.session_state:
             st.session_state[key] = False if key.endswith("warning") or key.endswith("form") else None
 
-def setup_tab_menu(default_tab):
+def setup_tab_menu():
     tab_options = {
         "📋전체 일정 보기": "view",
         "✏️일정 수정/추가": "edit",
