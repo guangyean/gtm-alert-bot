@@ -21,12 +21,15 @@ def setup_tab_menu(default_tab):
         "⚙️스케줄 자동 생성": "generate"
     }
     tab_labels = list(tab_options.keys())
-    default_index = list(tab_options.values()).index(default_tab) if default_tab in tab_options.values() else 0
-    selected_tab_label = option_menu(
+    query_tab = st.query_params.get("tab", ["view"])[0]
+
+    selected_tab_label = next((label for label, value in tab_options.items() if value == query_tab), tab_labels[0])
+
+    selected = option_menu(
         menu_title=None,
         options=tab_labels,
         icons=["", "", ""],
-        default_index=default_index,
+        default_index=tab_labels.index(selected_tab_label),
         orientation="horizontal",
         styles={
             "container": {
@@ -52,14 +55,7 @@ def setup_tab_menu(default_tab):
             }
         }
     )
-    selected_value = tab_options[selected_tab_label]
-
-    # ✅ Only update and rerun if tab actually changed
-    if selected_value != st.session_state.get("selected_tab"):
-        st.session_state.selected_tab = selected_value
-        st.rerun()  # ✅ rerun immediately so tab switches instantly
-
-    return selected_value
+    return tab_options[selected]
 
 @st.cache_data(ttl=300)
 def get_cached_schedules():
@@ -115,10 +111,7 @@ def main():
 
     init_session_state()
 
-    query_params = st.query_params
-    tab_param = query_params.get("tab", ["view"])[0]
-
-    selected_tab = setup_tab_menu(tab_param)
+    selected_tab = setup_tab_menu()
     df_reload = reload_df()
 
     if selected_tab == "view":
