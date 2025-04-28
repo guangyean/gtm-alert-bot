@@ -116,8 +116,8 @@ def main():
     init_session_state()
 
     ## 🛠 VERY IMPORTANT: Force reload once if query params not ready
-    if "tab" not in st.query_params:
-        st.rerun()
+    if st.query_params is None or "tab" not in st.query_params:
+        st.stop()
 
     current_tab = get_current_tab_from_query()
     selected_tab = setup_tab_menu(current_tab)
