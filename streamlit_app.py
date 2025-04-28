@@ -117,7 +117,7 @@ def main():
 
     ## 🛠 VERY IMPORTANT: Force reload once if query params not ready
     if "tab" not in st.query_params:
-        st.experimental_rerun()
+        st.rerun()
 
     current_tab = get_current_tab_from_query()
     selected_tab = setup_tab_menu(current_tab)
