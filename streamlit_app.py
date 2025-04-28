@@ -118,6 +118,12 @@ def main():
 
     init_session_state()
 
+    if "tab" not in st.query_params:
+        from urllib.parse import urlparse, parse_qs
+        url = st.experimental_get_query_params()
+        if url and "tab" in url:
+            st.experimental_rerun()
+            
     selected_tab = setup_tab_menu()
     df_reload = reload_df()
 
