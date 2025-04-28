@@ -14,14 +14,16 @@ def init_session_state():
         if key not in st.session_state:
             st.session_state[key] = False if key.endswith("warning") or key.endswith("form") else None
 
-def get_current_tab_from_url():
-    query_tab = st.query_params.get("tab", ["view"])[0]
-    valid_tabs = ["view", "edit", "generate"]
-    if query_tab not in valid_tabs:
-        return "view"
+def get_current_tab_from_query():
+    # Safely read tab parameter
+    query_tab = st.query_params.get("tab", ["view"])
+    if isinstance(query_tab, list):
+        query_tab = query_tab[0]
+    if query_tab not in ["view", "edit", "generate"]:
+        query_tab = "view"
     return query_tab
 
-def setup_tab_menu():
+def setup_tab_menu(current_tab):
     tab_options = {
         "📋전체 일정 보기": "view",
         "✏️일정 수정/추가": "edit",
@@ -29,19 +31,15 @@ def setup_tab_menu():
     }
     tab_labels = list(tab_options.keys())
 
-    query_tab = get_current_tab_from_url()
-    # Find label corresponding to query_tab
-    selected_tab_label = [label for label, value in tab_options.items() if value == query_tab]
-    if selected_tab_label:
-        default_index = tab_labels.index(selected_tab_label[0])
-    else:
-        default_index = 0
+    # Find the label corresponding to the tab value
+    label_lookup = {v: k for k, v in tab_options.items()}
+    default_label = label_lookup.get(current_tab, "📋전체 일정 보기")
 
     selected_tab_label = option_menu(
         menu_title=None,
         options=tab_labels,
         icons=["", "", ""],
-        default_index=default_index,
+        default_index=tab_labels.index(default_label),
         orientation="horizontal",
         styles={
             "container": {
@@ -68,9 +66,8 @@ def setup_tab_menu():
         }
     )
 
-    selected_value = tab_options[selected_tab_label]
-
-    return selected_value
+    selected_tab_value = tab_options[selected_tab_label]
+    return selected_tab_value
 
 @st.cache_data(ttl=300)
 def get_cached_schedules():
@@ -118,13 +115,12 @@ def main():
 
     init_session_state()
 
+    ## 🛠 VERY IMPORTANT: Force reload once if query params not ready
     if "tab" not in st.query_params:
-        from urllib.parse import urlparse, parse_qs
-        url = st.experimental_get_query_params()
-        if url and "tab" in url:
-            st.experimental_rerun()
-            
-    selected_tab = setup_tab_menu()
+        st.experimental_rerun()
+
+    current_tab = get_current_tab_from_query()
+    selected_tab = setup_tab_menu(current_tab)
     df_reload = reload_df()
 
     if selected_tab == "view":
