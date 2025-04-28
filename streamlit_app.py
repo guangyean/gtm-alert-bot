@@ -1,9 +1,9 @@
 import streamlit as st
+from streamlit_option_menu import option_menu
 from datetime import datetime, timedelta
 import pandas as pd
 import pytz
 from utils import calculate_d_day
-from streamlit_option_menu import option_menu
 from db import load_schedules
 from tab1 import tab1
 from tab2 import tab2
@@ -14,6 +14,13 @@ def init_session_state():
         if key not in st.session_state:
             st.session_state[key] = False if key.endswith("warning") or key.endswith("form") else None
 
+def get_current_tab_from_url():
+    query_tab = st.query_params.get("tab", ["view"])[0]
+    valid_tabs = ["view", "edit", "generate"]
+    if query_tab not in valid_tabs:
+        return "view"
+    return query_tab
+
 def setup_tab_menu():
     tab_options = {
         "📋전체 일정 보기": "view",
@@ -21,15 +28,20 @@ def setup_tab_menu():
         "⚙️스케줄 자동 생성": "generate"
     }
     tab_labels = list(tab_options.keys())
-    query_tab = st.query_params.get("tab", ["view"])[0]
 
-    selected_tab_label = next((label for label, value in tab_options.items() if value == query_tab), tab_labels[0])
+    query_tab = get_current_tab_from_url()
+    # Find label corresponding to query_tab
+    selected_tab_label = [label for label, value in tab_options.items() if value == query_tab]
+    if selected_tab_label:
+        default_index = tab_labels.index(selected_tab_label[0])
+    else:
+        default_index = 0
 
-    selected = option_menu(
+    selected_tab_label = option_menu(
         menu_title=None,
         options=tab_labels,
         icons=["", "", ""],
-        default_index=tab_labels.index(selected_tab_label),
+        default_index=default_index,
         orientation="horizontal",
         styles={
             "container": {
@@ -55,7 +67,10 @@ def setup_tab_menu():
             }
         }
     )
-    return tab_options[selected]
+
+    selected_value = tab_options[selected_tab_label]
+
+    return selected_value
 
 @st.cache_data(ttl=300)
 def get_cached_schedules():
@@ -63,28 +78,23 @@ def get_cached_schedules():
 
 def reload_df():
     raw_filter = st.query_params.get("filter", "")
-    
-    # Normalize to string and lowercase
     if isinstance(raw_filter, list):
         filter_param = "".join(raw_filter).lower().strip()
     else:
         filter_param = str(raw_filter).lower().strip()
 
-    # Load full or filtered data based on query param
     if "changed" in filter_param:
         df = load_schedules()
     else:
         df = get_cached_schedules()
 
     df["due_date"] = pd.to_datetime(df.get("due_date"), errors="coerce")
-
-    # ✅ Convert to KST
     seoul = pytz.timezone("Asia/Seoul")
 
     df["created_at_date"] = (
-    pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce")
-    .dt.tz_localize("Asia/Seoul", ambiguous='NaT')  # assume KST
-    .dt.date
+        pd.to_datetime(df.get("created_at", pd.NaT), errors="coerce")
+        .dt.tz_localize("Asia/Seoul", ambiguous='NaT')
+        .dt.date
     )
 
     df["updated_at_date"] = (
@@ -101,9 +111,6 @@ def reload_df():
     df["D-Day"] = df["due_date"].apply(calculate_d_day)
 
     return df
-
-
-
 
 def main():
     st.set_page_config("📅 GTM 일정 대시보드", layout="wide")
@@ -123,4 +130,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
