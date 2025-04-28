@@ -118,10 +118,7 @@ def main():
     query_params = st.query_params
     tab_param = query_params.get("tab", ["view"])[0]
 
-    if "selected_tab" not in st.session_state:
-        st.session_state.selected_tab = tab_param
-
-    selected_tab = setup_tab_menu(st.session_state.selected_tab)
+    selected_tab = setup_tab_menu(tab_param)
     df_reload = reload_df()
 
     if selected_tab == "view":
